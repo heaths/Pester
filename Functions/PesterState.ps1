@@ -76,6 +76,7 @@ function New-PesterState
         {
             & $SafeCommands['New-Object'] psobject -Property @{
                 Name              = $Name
+                Id                = New-TestId $Name
                 Type              = 'TestGroup'
                 Hint              = $Hint
                 Actions           = [System.Collections.ArrayList]@()
@@ -174,8 +175,10 @@ function New-PesterState
                 Inconclusive { $script:InconclusiveCount++; break; }
             }
 
+            $id = New-TestId $script:TestGroupStack.Peek().Id, $Name
             $resultRecord = & $SafeCommands['New-Object'] -TypeName PsObject -Property @{
                 Name                   = $Name
+                Id                     = $id
                 Type                   = 'TestCase'
                 Passed                 = $Passed
                 Result                 = $Result
@@ -217,6 +220,7 @@ function New-PesterState
                 Describe               = $describe
                 Context                = $context
                 Name                   = $Name
+                Id                     = $id
                 Passed                 = $Passed
                 Result                 = $Result
                 Time                   = $Time
@@ -225,7 +229,7 @@ function New-PesterState
                 ErrorRecord            = $ErrorRecord
                 ParameterizedSuiteName = $ParameterizedSuiteName
                 Parameters             = $Parameters
-                Show                  = $script:Show
+                Show                   = $script:Show
             }
         }
 

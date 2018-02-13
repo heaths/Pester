@@ -1162,6 +1162,37 @@ Throw "This command has been renamed to 'Assert-VerifiableMock' (without the 's'
 
 }
 
+function New-TestId {
+
+<#
+.SYNOPSIS
+This command is used by Pester. You do not need to call it directly.
+
+.DESCRIPTION
+This command can generate a durable GUID based on an input value. It uses the first 16 bytes of a SHA1 hash since MD5 may not be supported for FIPS compliance.
+
+.PARAMETER InputObject
+The value used to generate a durable GUID.
+
+.LINK
+https://gist.github.com/heaths/7470fc582dcfcc9c87f65e013432d3c3
+#>
+    [CmdletBinding()]
+    [OutputType([System.Guid])]
+    param (
+        [Parameter(Mandatory=$true, Position=0)]
+        [string[]] $InputObject
+    )
+
+    $buffer = foreach ($str in $InputObject) {
+        [System.Text.Encoding]::Unicode.GetBytes($InputObject)
+    }
+
+    $csp = [System.Security.Cryptography.SHA1]::Create()
+    [byte[]] $hash = $csp.ComputeHash($buffer)[0..15]
+    & $script:SafeCommands['New-Object'] System.Guid(@(,$hash))
+}
+
 & $script:SafeCommands['Export-ModuleMember'] Describe, Context, It, In, Mock, Assert-VerifiableMock, Assert-VerifiableMocks, Assert-MockCalled, Set-TestInconclusive
 & $script:SafeCommands['Export-ModuleMember'] New-Fixture, Get-TestDriveItem, Should, Invoke-Pester, Setup, InModuleScope, Invoke-Mock
 & $script:SafeCommands['Export-ModuleMember'] BeforeEach, AfterEach, BeforeAll, AfterAll
@@ -1169,3 +1200,4 @@ Throw "This command has been renamed to 'Assert-VerifiableMock' (without the 's'
 & $script:SafeCommands['Export-ModuleMember'] SafeGetCommand, New-PesterOption
 & $script:SafeCommands['Export-ModuleMember'] Invoke-Gherkin, Find-GherkinStep, BeforeEachFeature, BeforeEachScenario, AfterEachFeature, AfterEachScenario, GherkinStep -Alias Given, When, Then, And, But
 & $script:SafeCommands['Export-ModuleMember'] New-MockObject, Add-AssertionOperator
+& $script:SafeCommands['Export-ModuleMember'] New-TestId
